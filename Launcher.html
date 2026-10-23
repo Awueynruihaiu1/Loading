@@ -1,0 +1,366 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        height: 100vh;
+        background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .launcher {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .address-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        max-width: 370px;
+        position: relative;
+    }
+
+    #address {
+        flex: 1;
+        min-width: 0;
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+    }
+
+    #address:focus {
+        border-color: #1677ff;
+    }
+
+    #sitesButton {
+        height: 36px;
+        width: 38px;
+        background: white;
+        border: 1px solid #d0d0d0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    #sitesButton:hover {
+        background: #f4f4f4;
+    }
+
+    #sitesPopup {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 43px;
+        width: 230px;
+        padding: 6px;
+        background: white;
+        border: 1px solid #dedede;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px #00000018;
+        z-index: 10;
+    }
+
+    #sitesPopup.show {
+        display: block;
+    }
+
+    .site-option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 10px;
+        border: none;
+        background: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #222;
+    }
+
+    .site-option:hover {
+        background: #f0f5ff;
+    }
+
+    #launch {
+        width: 150px;
+        height: 46px;
+        border: none;
+        border-radius: 7px;
+        background: #1677ff;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    #launch:hover {
+        background: #0864df;
+    }
+
+    #launch:active {
+        background: #0756c4;
+    }
+
+    #error {
+        display: none;
+        color: #d93025;
+        font-size: 12px;
+        text-align: center;
+        max-width: 370px;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+    }
+
+    #error.fade-out {
+        opacity: 0;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="launcher">
+
+    <div class="address-row">
+        <input
+            id="address"
+            type="text"
+            placeholder="Enter website address..."
+            autocomplete="off"
+            spellcheck="false"
+        >
+
+        <button
+            id="sitesButton"
+            type="button"
+            title="Saved websites"
+            aria-label="Saved websites"
+        >▾</button>
+
+        <div id="sitesPopup">
+
+            <button
+                class="site-option"
+                data-url="https://awueynruihaiu1.github.io/Google-drive/"
+            >
+                Eag 1.8.8
+            </button>
+
+            <button
+                class="site-option"
+                data-url="https://anonymousbirb5100.github.io/drive-mad/"
+            >
+                Drive Mad
+            </button>
+
+            <button
+                class="site-option"
+                data-url="https://the-impossible-quiz.gitlab.io/go/class-472.html"
+            >
+                Impossible quiz site
+            </button>
+
+        </div>
+    </div>
+
+    <button id="launch" type="button">Launch</button>
+
+    <div id="error"></div>
+
+</div>
+
+<script>
+    const address = document.getElementById("address");
+    const sitesButton = document.getElementById("sitesButton");
+    const sitesPopup = document.getElementById("sitesPopup");
+    const launchButton = document.getElementById("launch");
+    const error = document.getElementById("error");
+
+    let errorTimeout;
+    let fadeTimeout;
+
+    // Show an error for 2 seconds, then fade it out
+    function showError(message) {
+        clearTimeout(errorTimeout);
+        clearTimeout(fadeTimeout);
+
+        error.classList.remove("fade-out");
+        error.style.display = "block";
+        error.style.opacity = "1";
+        error.textContent = message;
+
+        errorTimeout = setTimeout(() => {
+            error.classList.add("fade-out");
+
+            fadeTimeout = setTimeout(() => {
+                error.style.display = "none";
+                error.classList.remove("fade-out");
+                error.style.opacity = "1";
+            }, 500);
+        }, 2000);
+    }
+
+    // Hide any visible error immediately
+    function hideError() {
+        clearTimeout(errorTimeout);
+        clearTimeout(fadeTimeout);
+
+        error.style.display = "none";
+        error.classList.remove("fade-out");
+        error.style.opacity = "1";
+    }
+
+    // Toggle the saved websites popup
+    sitesButton.addEventListener("click", () => {
+        sitesPopup.classList.toggle("show");
+    });
+
+    // Select a saved website
+    document.querySelectorAll(".site-option").forEach(button => {
+        button.addEventListener("click", () => {
+            address.value = button.dataset.url;
+            sitesPopup.classList.remove("show");
+            hideError();
+        });
+    });
+
+    // Close popup when clicking elsewhere
+    document.addEventListener("click", event => {
+        if (
+            !sitesPopup.contains(event.target) &&
+            event.target !== sitesButton
+        ) {
+            sitesPopup.classList.remove("show");
+        }
+    });
+
+    // Validate and normalize the website address
+    function normalizeAddress(value) {
+        let url = value.trim();
+
+        if (!url) return null;
+
+        if (!/^https?:\/\//i.test(url)) {
+            url = "https://" + url;
+        }
+
+        try {
+            const parsed = new URL(url);
+
+            if (!["https:", "http:"].includes(parsed.protocol)) {
+                return null;
+            }
+
+            if (
+                !parsed.hostname.includes(".") &&
+                parsed.hostname !== "localhost"
+            ) {
+                return null;
+            }
+
+            return parsed.href;
+        } catch {
+            return null;
+        }
+    }
+
+    // Launch the website in a new about:blank tab
+    launchButton.addEventListener("click", () => {
+        const url = normalizeAddress(address.value);
+
+        if (!url) {
+            showError("Please enter a valid website address.");
+            address.focus();
+            return;
+        }
+
+        hideError();
+
+        const newTab = window.open("about:blank", "_blank");
+
+        if (!newTab) {
+            showError(
+                "The new tab was blocked. Allow popups and try again."
+            );
+            return;
+        }
+
+        newTab.document.open();
+
+        newTab.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>Loading</title>
+                <style>
+                    * {
+                        font-family: "Segoe UI", Arial, sans-serif;
+                    }
+
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        height: 100%;
+                        overflow: hidden;
+                        background: white;
+                    }
+
+                    iframe {
+                        display: block;
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <iframe id="websiteFrame"></iframe>
+            </body>
+            </html>
+        `);
+
+        newTab.document.close();
+
+        newTab.document.getElementById("websiteFrame").src = url;
+    });
+
+    // Press Enter to launch
+    address.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            launchButton.click();
+        }
+    });
+
+    // Clear the error when the user starts correcting the address
+    address.addEventListener("input", () => {
+        hideError();
+    });
+</script>
+
+</body>
+</html>
